@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>allaigenerator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#EEF2F8; --panel:#FFFFFF; --ink:#13203B; --muted:#5B6783; --line:#D7DEEB;
+  --accent:#3A35E8; --accent-ink:#FFFFFF; --soft:#E4E6FF; --good:#0F8A5F; --bad:#C23B3B; --warn:#9A6200;
+  --display:'Bricolage Grotesque','Trebuchet MS',system-ui,sans-serif;
+  --body:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1424; --panel:#161E34; --ink:#E8ECF7; --muted:#9AA6C4; --line:#2A3558;
+    --accent:#8B88FF; --accent-ink:#0E1424; --soft:#252B57; --good:#4FD1A0; --bad:#FF8A8A; --warn:#F2C06B;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1424; --panel:#161E34; --ink:#E8ECF7; --muted:#9AA6C4; --line:#2A3558;
+  --accent:#8B88FF; --accent-ink:#0E1424; --soft:#252B57; --good:#4FD1A0; --bad:#FF8A8A; --warn:#F2C06B;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.1;letter-spacing:-.02em}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hidden{display:none!important}
+
+/* login */
+.login{min-height:100vh;display:grid;grid-template-columns:1.15fr 1fr}
+.login-hero{padding:56px 48px;display:flex;flex-direction:column;justify-content:space-between;background:var(--ink);color:var(--bg);position:relative;overflow:hidden}
+.login-hero h1{font-size:clamp(40px,6vw,76px);font-weight:800;max-width:11ch}
+.login-hero p{max-width:38ch;color:color-mix(in srgb,var(--bg) 72%,transparent);margin:20px 0 0}
+.wordmark{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.02em}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatches span{width:76px;height:76px;border-radius:50%;opacity:.95}
+.login-form{display:flex;align-items:center;justify-content:center;padding:32px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:28px;width:100%;max-width:400px}
+.card h2{font-size:26px;margin-bottom:6px}
+.muted{color:var(--muted)}
+.field{display:block;margin:18px 0 6px;font-weight:600;font-size:14px}
+input[type=email],input[type=text],textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+textarea{resize:vertical;min-height:96px}
+.btn{border:0;border-radius:10px;padding:12px 18px;font-weight:600;background:var(--accent);color:var(--accent-ink);transition:transform .08s}
+.btn:active{transform:scale(.98)}
+.btn.block{width:100%;margin-top:18px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:7px 12px;font-size:13px;border-radius:8px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:8px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px}
+
+/* app */
+.app{min-height:100vh}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.top .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.credit{background:var(--soft);border-radius:999px;padding:7px 14px;font-weight:600;font-variant-numeric:tabular-nums}
+.who{font-size:13px;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(320px,440px) 1fr;gap:20px;padding:20px;max-width:1280px;margin:0 auto;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+.tabs{display:flex;gap:6px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:18px}
+.tabs button{flex:1;border:0;background:transparent;padding:9px;border-radius:9px;font-weight:600;color:var(--muted)}
+.tabs button[aria-selected=true]{background:var(--panel);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.label{font-weight:600;font-size:14px;margin:18px 0 8px;display:block}
+.label:first-of-type{margin-top:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:13px}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.models{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.model{text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.model b{font-size:14px}
+.model small{color:var(--muted);font-size:12px;line-height:1.35}
+.model .cost{font-size:12px;color:var(--accent);font-weight:600;margin-top:4px}
+.model[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;background:var(--soft)}
+.model[disabled]{opacity:.55;cursor:not-allowed}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:56px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 6px;font-weight:600}
+.seg button[aria-pressed=true]{border-color:var(--accent);background:var(--soft);box-shadow:0 0 0 1px var(--accent) inset}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.estimate{margin-top:20px;border-top:1px dashed var(--line);padding-top:16px}
+.estimate .sum{display:flex;justify-content:space-between;align-items:baseline;font-weight:600}
+.estimate .sum span:last-child{font-family:var(--display);font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.warn{color:var(--warn);font-size:12.5px;margin-top:6px}
+.low{color:var(--bad)}
+
+/* results */
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.item{background:var(--bg);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.thumb{display:flex;align-items:center;justify-content:center;background:var(--soft);padding:10px;min-height:160px;position:relative}
+.thumb svg{display:block;max-width:100%;max-height:260px;border-radius:8px}
+.badge{position:absolute;right:16px;top:16px;background:rgba(10,14,28,.78);color:#fff;font-size:12px;padding:3px 9px;border-radius:999px}
+.meta{padding:10px 12px 6px;font-size:13px}
+.meta b{display:block;font-size:13.5px}
+.meta .p{color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
+.acts{display:flex;gap:6px;padding:6px 12px 12px;flex-wrap:wrap}
+.acts button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 9px;font-size:12.5px}
+.acts button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.job{padding:14px;display:flex;flex-direction:column;gap:10px;justify-content:center;min-height:200px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.empty{border:1px dashed var(--line);border-radius:14px;padding:40px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-family:var(--display);font-size:18px;margin-bottom:4px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:20;max-width:90vw}
+.tips{margin-top:20px;font-size:13px}
+.tips summary{cursor:pointer;font-weight:600}
+.tips ul{margin:8px 0 0;padding-left:18px;color:var(--muted)}
+
+@media (max-width:900px){
+  .login{grid-template-columns:1fr}
+  .login-hero{padding:28px 24px;gap:28px}
+  .swatches span{width:48px;height:48px}
+  .layout{grid-template-columns:1fr;padding:12px}
+  .who{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<main class="login" id="loginView">
+  <section class="login-hero">
+    <div class="wordmark">allaigenerator</div>
+    <div>
+      <h1>Satu tempat untuk gambar dan video AI.</h1>
+      <p>Masuk dengan akun Canva Business kamu, pilih model, lalu generate memakai kredit.</p>
+    </div>
+    <div class="swatches" aria-hidden="true">
+      <span style="background:#3A35E8"></span><span style="background:#FF7A59"></span><span style="background:#2FD6A5"></span><span style="background:#FFD166"></span><span style="background:#F2F4FA"></span>
+    </div>
+  </section>
+  <section class="login-form">
+    <div class="card">
+      <h2>Masuk</h2>
+      <p class="muted" style="margin:0">Akun baru langsung dapat 8.500 kredit.</p>
+      <label class="field" for="email">Email akun Canva Business</label>
+      <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="nama@perusahaan.com">
+      <div class="err" id="loginErr" role="alert"></div>
+      <button class="btn block" id="loginBtn">Masuk dengan Canva</button>
+      <p class="note">Mode prototipe: login Canva disimulasikan dan email dicek ke daftar putih demo. Di versi produksi, tombol ini membuka halaman OAuth Canva.</p>
+    </div>
+  </section>
+</main>
+
+<!-- APP -->
+<div class="app hidden" id="appView">
+  <header class="top">
+    <div class="wordmark">allaigenerator</div>
+    <div class="right">
+      <span class="who" id="who"></span>
+      <span class="credit" id="credit" aria-live="polite"></span>
+      <button class="btn ghost small" id="logoutBtn">Keluar</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="panel" aria-label="Pengaturan generate">
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tabImage" aria-selected="true" data-tab="image">Gambar</button>
+        <button role="tab" id="tabVideo" aria-selected="false" data-tab="video">Video</button>
+      </div>
+      <div id="form"></div>
+    </section>
+
+    <section class="panel" aria-label="Hasil">
+      <div class="results-head">
+        <h2 style="font-size:22px">Hasil</h2>
+        <div class="row">
+          <button class="chip" id="favFilter" aria-pressed="false">Favorit saja</button>
+          <button class="chip" id="resetBtn" title="Kembalikan kredit ke 8.500 dan hapus riwayat">Reset demo</button>
+        </div>
+      </div>
+      <div class="grid" id="results"></div>
+    </section>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast" role="status"></div>
+
+<script>
+(function(){
+  /* ---------- data ---------- */
+  var START_CREDITS = 8500;
+  var WHITELIST = []; // kosong = semua email diterima di mode demo. Isi dengan email/team ID yang diizinkan.
+
+  var IMG_MODELS = [
+    {id:'chatgpt', name:'ChatGPT Images', desc:'Realistis, edit foto, desain dari prompt', cost:120},
+    {id:'midjourney', name:'Midjourney', desc:'Anime, fantasy, cinematic, artwork', cost:150, off:'Belum ada API resmi'},
+    {id:'nano', name:'Nano Banana', desc:'Edit foto, karakter dan objek tetap konsisten', cost:80, ref:true},
+    {id:'flux', name:'FLUX', desc:'Fotorealistik, detail tinggi', cost:60},
+    {id:'ideogram', name:'Ideogram', desc:'Poster, logo, gambar dengan tulisan', cost:90},
+    {id:'leonardo', name:'Leonardo AI', desc:'Karakter, game, concept art', cost:70},
+    {id:'firefly', name:'Adobe Firefly', desc:'Desain dan kebutuhan komersial', cost:100}
+  ];
+  var VID_MODELS = [
+    {id:'veo', name:'Google Veo 3.1', desc:'Video realistis dengan suara dan dialog', mult:2.0, native:8},
+    {id:'kling', name:'Kling 3.0', desc:'Cinematic, karakter bergerak', mult:1.4, native:10},
+    {id:'runway', name:'Runway Gen-4.5', desc:'Film, iklan, editing profesional', mult:1.8, native:10},
+    {id:'seedance', name:'Seedance', desc:'Adegan panjang dan multi-shot', mult:1.2, native:10},
+    {id:'pika', name:'Pika', desc:'Video pendek dan efek kreatif', mult:0.8, native:5},
+    {id:'heygen', name:'HeyGen', desc:'Avatar dan orang berbicara', mult:1.5, native:15},
+    {id:'luma', name:'Luma', desc:'Cinematic dan gerakan kamera', mult:1.3, native:9}
+  ];
+  var DURATIONS = {5:500, 8:800, 12:1200, 15:1500};
+  var PURPOSES = [
+    {k:'Poster atau teks', m:'ideogram'},
+    {k:'Foto realistis', m:'flux'},
+    {k:'Anime atau fantasi', m:'leonardo'},
+    {k:'Edit foto', m:'nano'},
+    {k:'Desain komersial', m:'firefly'},
+    {k:'Gambar serbaguna', m:'chatgpt'}
+  ];
+  var RATIOS = {'1:1':[400,400],'9:16':[225,400],'16:9':[400,225]};
+
+  /* ---------- state ---------- */
+  var S = {user:null, credits:START_CREDITS, history:[], tab:'image', favOnly:false,
+    img:{model:'chatgpt', prompt:'', ratio:'1:1', n:1, ref:'', purpose:''},
+    vid:{model:'veo', prompt:'', dur:5, ratio:'16:9'}};
+  var jobs = [];
+
+  function load(){
+    try{
+      var raw = localStorage.getItem('allai_v1');
+      if(raw){ var d = JSON.parse(raw); S.user=d.user||null; S.credits=typeof d.credits==='number'?d.credits:START_CREDITS; S.history=d.history||[]; }
+    }catch(e){}
+  }
+  function save(){
+    try{ localStorage.setItem('allai_v1', JSON.stringify({user:S.user, credits:S.credits, history:S.history.slice(0,60)})); }catch(e){}
+  }
+
+  /* ---------- helpers ---------- */
+  function $(id){return document.getElementById(id)}
+  function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function fmt(n){return Number(n).toLocaleString('id-ID')}
+  function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+  function rng(seed){var a=seed;return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function toast(msg){var t=$('toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.add('hidden')},2600)}
+  function imgModel(id){return IMG_MODELS.find(function(m){return m.id===id})}
+  function vidModel(id){return VID_MODELS.find(function(m){return m.id===id})}
+  function vidCost(){var m=vidModel(S.vid.model);return Math.round(DURATIONS[S.vid.dur]*m.mult)}
+  function imgCost(){return imgModel(S.img.model).cost*S.img.n}
+
+  function art(seed, ratio, video){
+    var wh = RATIOS[ratio]||RATIOS['1:1'], w=wh[0], h=wh[1], r=rng(seed), hue=Math.floor(r()*360);
+    var id='g'+seed;
+    var s='<svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pratinjau demo">'+
+      '<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl('+hue+',70%,58%)"/><stop offset="1" stop-color="hsl('+((hue+70)%360)+',75%,38%)"/></linearGradient>'+
+      '<filter id="b'+seed+'"><feGaussianBlur stdDeviation="'+Math.round(w/16)+'"/></filter></defs>'+
+      '<rect width="'+w+'" height="'+h+'" fill="url(#'+id+')"/><g filter="url(#b'+seed+')">';
+    for(var i=0;i<5;i++){
+      s+='<circle cx="'+Math.round(r()*w)+'" cy="'+Math.round(r()*h)+'" r="'+Math.round(w*(.14+r()*.28))+'" fill="hsl('+Math.floor((hue+r()*160)%360)+',85%,'+Math.round(55+r()*20)+'%)" opacity=".7"/>';
+    }
+    s+='</g>';
+    if(video){ s+='<circle cx="'+w/2+'" cy="'+h/2+'" r="'+Math.round(Math.min(w,h)*.13)+'" fill="rgba(255,255,255,.88)"/><path d="M'+(w/2-Math.min(w,h)*.04)+' '+(h/2-Math.min(w,h)*.065)+'L'+(w/2+Math.min(w,h)*.07)+' '+h/2+'L'+(w/2-Math.min(w,h)*.04)+' '+(h/2+Math.min(w,h)*.065)+'Z" fill="#13203B"/>'; }
+    return s+'</svg>';
+  }
+
+  /* ---------- login ---------- */
+  function doLogin(){
+    var email = $('email').value.trim().toLowerCase();
+    var err = $('loginErr'); err.textContent='';
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err.textContent='Masukkan email yang valid, misalnya nama@perusahaan.com.'; return; }
+    if(WHITELIST.length && WHITELIST.indexOf(email)<0){ err.textContent='Email ini belum terdaftar di tim Canva Business yang diizinkan.'; return; }
+    S.user = email;
+    save(); showApp();
+  }
+  function showApp(){
+    $('loginView').classList.add('hidden');
+    $('appView').classList.remove('hidden');
+    $('who').textContent = S.user;
+    renderAll();
+  }
+  function logout(){ S.user=null; save(); $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); }
+
+  /* ---------- render ---------- */
+  function renderAll(){ renderCredit(); renderTabs(); renderForm(); renderResults(); }
+  function renderCredit(){ $('credit').textContent = fmt(S.credits)+' kredit'; }
+  function renderTabs(){
+    $('tabImage').setAttribute('aria-selected', S.tab==='image');
+    $('tabVideo').setAttribute('aria-selected', S.tab==='video');
+  }
+
+  function renderForm(){
+    var f = $('form'), h='';
+    if(S.tab==='image'){
+      var st=S.img, cur=imgModel(st.model), cost=imgCost(), short=cost>S.credits;
+      h+='<span class="label">Tujuan gambar (otomatis pilih model)</span><div class="chips">'+
+        PURPOSES.map(function(p){return '<button class="chip" data-purpose="'+esc(p.k)+'" aria-pressed="'+(st.purpose===p.k)+'">'+esc(p.k)+'</button>'}).join('')+'</div>';
+      h+='<span class="label">Model</span><div class="models">'+IMG_MODELS.map(function(m){
+        return '<button class="model" data-imodel="'+m.id+'" aria-pressed="'+(st.model===m.id)+'"'+(m.off?' disabled':'')+'><b>'+esc(m.name)+'</b><small>'+esc(m.desc)+'</small><span class="cost">'+(m.off?esc(m.off):fmt(m.cost)+' kredit per gambar')+'</span></button>';
+      }).join('')+'</div>';
+      h+='<label class="label" for="iprompt">Prompt</label><textarea id="iprompt" placeholder="Contoh: botol parfum di atas batu basah, cahaya pagi, latar kabut">'+esc(st.prompt)+'</textarea>'+
+        '<div class="row" style="margin-top:8px"><button class="btn ghost small" id="enhance">Perkaya prompt</button><span class="muted" style="font-size:12.5px">Prompt singkat ditambah detail cahaya dan komposisi.</span></div>';
+      h+='<span class="label">Rasio</span><div class="seg">'+Object.keys(RATIOS).map(function(r){return '<button data-iratio="'+r+'" aria-pressed="'+(st.ratio===r)+'">'+r+'</button>'}).join('')+'</div>';
+      h+='<span class="label">Jumlah variasi</span><div class="seg">'+[1,2,3,4].map(function(n){return '<button data-in="'+n+'" aria-pressed="'+(st.n===n)+'">'+n+'</button>'}).join('')+'</div>';
+      h+='<span class="label">Gambar referensi (opsional)</span><input type="file" id="ref" accept="image/*">'+
+        '<div class="muted" style="font-size:12.5px;margin-top:6px">'+(st.ref?('Dipilih: '+esc(st.ref)):'Dipakai untuk menjaga karakter atau produk tetap konsisten.')+(cur.ref?'':' Model ini tidak mendukung referensi, jadi file akan diabaikan.')+'</div>';
+      h+='<div class="estimate"><div class="sum"><span>Estimasi biaya</span><span class="'+(short?'low':'')+'">'+fmt(cost)+'</span></div>'+
+        (short?'<div class="warn low">Kredit tidak cukup. Kurangi variasi atau pilih model lain.</div>':'<div class="warn" style="color:var(--muted)">Kredit otomatis dikembalikan jika generate gagal.</div>')+
+        '<button class="btn block" id="go"'+(short?' disabled':'')+'>Generate gambar</button></div>';
+      h+='<details class="tips"><summary>Tips supaya hasil lebih bagus</summary><ul><li>Sebut subjek, suasana, dan gaya dalam satu kalimat.</li><li>Untuk tulisan di gambar, pakai Ideogram dan tulis teksnya dalam tanda kutip.</li><li>Untuk edit foto atau karakter yang sama, pakai Nano Banana dengan gambar referensi.</li><li>Mulai dari 1 variasi, lalu naikkan setelah arahnya cocok.</li></ul></details>';
+    } else {
+      var v=S.vid, vm=vidModel(v.model), vc=vidCost(), vshort=vc>S.credits, ext = v.dur>vm.native, clips = Math.ceil(v.dur/vm.native);
+      h+='<span class="label">Model</span><div class="models">'+VID_MODELS.map(function(m){
+        return '<button class="model" data-vmodel="'+m.id+'" aria-pressed="'+(v.model===m.id)+'"><b>'+esc(m.name)+'</b><small>'+esc(m.desc)+'</small><span class="cost">Pengali x'+m.mult.toFixed(1).replace('.',',')+'</span></button>';
+      }).join('')+'</div>';
+      h+='<label class="label" for="vprompt">Prompt</label><textarea id="vprompt" placeholder="Contoh: kamera bergerak pelan mengitari secangkir kopi, uap naik, suasana kafe sore">'+esc(v.prompt)+'</textarea>';
+      h+='<span class="label">Durasi</span><div class="seg">'+Object.keys(DURATIONS).map(function(d){return '<button data-vdur="'+d+'" aria-pressed="'+(String(v.dur)===d)+'">'+d+' detik</button>'}).join('')+'</div>';
+      if(ext) h+='<div class="warn">'+esc(vm.name)+' kira-kira mendukung hingga '+vm.native+' detik per klip. Durasi ini dibuat dengan menyambung '+clips+' klip, jadi hasil bisa terasa terpotong.</div>';
+      h+='<span class="label">Rasio</span><div class="seg">'+['16:9','9:16'].map(function(r){return '<button data-vratio="'+r+'" aria-pressed="'+(v.ratio===r)+'">'+r+'</button>'}).join('')+'</div>';
+      h+='<div class="estimate"><div class="sum"><span>Estimasi biaya</span><span class="'+(vshort?'low':'')+'">'+fmt(vc)+'</span></div>'+
+        '<div class="warn" style="color:var(--muted)">'+fmt(DURATIONS[v.dur])+' kredit dasar x '+vm.mult.toFixed(1).replace('.',',')+'. Video diproses di antrean dan bisa memakan beberapa menit.</div>'+
+        (vshort?'<div class="warn low">Kredit tidak cukup untuk durasi dan model ini.</div>':'')+
+        '<button class="btn block" id="go"'+(vshort?' disabled':'')+'>Generate video</button></div>';
+    }
+    f.innerHTML = h;
+  }
+
+  function renderResults(){
+    var box=$('results'), h='';
+    jobs.forEach(function(j){
+      h+='<div class="item"><div class="job"><b>'+esc(j.label)+'</b><div class="muted" style="font-size:13px">'+esc(j.status)+'</div><div class="bar"><i style="width:'+j.pct+'%"></i></div></div></div>';
+    });
+    var list = S.history.filter(function(x){return !S.favOnly || x.fav});
+    list.forEach(function(x){
+      h+='<div class="item"><div class="thumb">'+art(x.seed,x.ratio,x.type==='video')+(x.type==='video'?'<span class="badge">'+x.dur+' dtk</span>':'')+'</div>'+
+        '<div class="meta"><b>'+esc(x.model)+'</b>'+(x.type==='video'?'<span class="muted">'+x.dur+' detik, '+x.ratio+'</span>':'<span class="muted">'+x.ratio+'</span>')+'<span class="p">'+esc(x.prompt)+'</span></div>'+
+        '<div class="acts"><button data-fav="'+x.id+'" aria-pressed="'+(!!x.fav)+'">Favorit</button><button data-again="'+x.id+'">Generate ulang</button><button data-canva="'+x.id+'">Kirim ke Canva</button></div></div>';
+    });
+    if(!jobs.length && !list.length){
+      h='<div class="empty" style="grid-column:1/-1"><b>'+(S.favOnly?'Belum ada favorit':'Belum ada hasil')+'</b>'+(S.favOnly?'Tandai hasil dengan Favorit supaya muncul di sini.':'Tulis prompt di sebelah kiri, lalu pilih Generate.')+'</div>';
+    }
+    box.innerHTML=h;
+  }
+
+  /* ---------- generate (simulasi) ---------- */
+  function generate(){
+    var isImg = S.tab==='image', st = isImg?S.img:S.vid;
+    var prompt = (st.prompt||'').trim();
+    if(!prompt){ toast('Tulis prompt dulu.'); return; }
+    var cost = isImg?imgCost():vidCost();
+    if(cost>S.credits){ toast('Kredit tidak cukup.'); return; }
+    S.credits -= cost; save(); renderCredit();
+    var model = isImg?imgModel(st.model):vidModel(st.model);
+    var job = {label:(isImg?'Gambar':'Video')+' dengan '+model.name, status:'Masuk antrean', pct:4};
+    jobs.unshift(job); renderResults(); renderForm();
+    var steps = isImg?['Masuk antrean','Memproses prompt','Membuat gambar','Menyelesaikan']:['Masuk antrean','Memproses prompt','Merender klip','Menyusun video','Menyelesaikan'];
+    var i=0, total = isImg?1800:4200, tick=total/steps.length;
+    var iv=setInterval(function(){
+      i++;
+      if(i<steps.length){ job.status=steps[i]; job.pct=Math.round(i/steps.length*100); renderResults(); return; }
+      clearInterval(iv);
+      jobs.splice(jobs.indexOf(job),1);
+      if(Math.random()<0.08){
+        S.credits += cost; save(); renderCredit(); renderResults();
+        toast('Generate gagal di sisi model. '+fmt(cost)+' kredit sudah dikembalikan.');
+        return;
+      }
+      var n = isImg?st.n:1;
+      for(var k=0;k<n;k++){
+        S.history.unshift({id:'h'+Date.now()+k, type:isImg?'image':'video', model:model.name, prompt:prompt, ratio:st.ratio, dur:isImg?0:st.dur, seed:hash(prompt+model.id+Date.now()+k), fav:false});
+      }
+      save(); renderResults();
+      toast('Selesai. Hasil ditambahkan ke daftar.');
+    }, tick);
+  }
+
+  function enhance(){
+    var t=($('iprompt').value||'').trim();
+    if(!t){ toast('Tulis prompt singkat dulu.'); return; }
+    S.img.prompt = t.replace(/[.\s]+$/,'')+', pencahayaan lembut dan natural, komposisi seimbang, detail tajam, warna harmonis, kualitas tinggi';
+    renderForm();
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    var d=b.dataset;
+    if(b.id==='loginBtn') return doLogin();
+    if(b.id==='logoutBtn') return logout();
+    if(b.id==='go') return generate();
+    if(b.id==='enhance') return enhance();
+    if(b.id==='favFilter'){ S.favOnly=!S.favOnly; b.setAttribute('aria-pressed',S.favOnly); return renderResults(); }
+    if(b.id==='resetBtn'){ S.credits=START_CREDITS; S.history=[]; save(); renderAll(); return toast('Demo direset ke 8.500 kredit.'); }
+    if(d.tab){ S.tab=d.tab; return renderAll(); }
+    if(d.purpose){ var p=PURPOSES.find(function(x){return x.k===d.purpose}); S.img.purpose=p.k; S.img.model=p.m; return renderForm(); }
+    if(d.imodel){ S.img.model=d.imodel; S.img.purpose=''; return renderForm(); }
+    if(d.iratio){ S.img.ratio=d.iratio; return renderForm(); }
+    if(d.in){ S.img.n=+d.in; return renderForm(); }
+    if(d.vmodel){ S.vid.model=d.vmodel; return renderForm(); }
+    if(d.vdur){ S.vid.dur=+d.vdur; return renderForm(); }
+    if(d.vratio){ S.vid.ratio=d.vratio; return renderForm(); }
+    if(d.fav){ var x=S.history.find(function(h){return h.id===d.fav}); if(x){x.fav=!x.fav; save(); renderResults();} return; }
+    if(d.again){
+      var y=S.history.find(function(h){return h.id===d.again}); if(!y) return;
+      S.tab=y.type; var m;
+      if(y.type==='image'){ m=IMG_MODELS.find(function(q){return q.name===y.model}); S.img.prompt=y.prompt; S.img.ratio=y.ratio; S.img.n=1; if(m)S.img.model=m.id; }
+      else { m=VID_MODELS.find(function(q){return q.name===y.model}); S.vid.prompt=y.prompt; S.vid.ratio=y.ratio; S.vid.dur=y.dur; if(m)S.vid.model=m.id; }
+      renderAll(); return generate();
+    }
+    if(d.canva){ return toast('Demo: di versi produksi, aset ini diunggah ke Canva lewat Connect API.'); }
+  });
+  document.addEventListener('input',function(e){
+    if(e.target.id==='iprompt') S.img.prompt=e.target.value;
+    if(e.target.id==='vprompt') S.vid.prompt=e.target.value;
+  });
+  document.addEventListener('change',function(e){
+    if(e.target.id==='ref'){ S.img.ref = e.target.files[0]?e.target.files[0].name:''; renderForm(); }
+  });
+  $('email').addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); });
+
+  /* ---------- init ---------- */
+  load();
+  if(S.user) showApp();
+})();
+</script>
+</body>
+</html>
